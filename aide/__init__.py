@@ -22,24 +22,57 @@ class Solution:
 
 class Experiment:
 
-    def __init__(self, data_dir: str, goal: str, eval: str | None = None):
+    def __init__(
+        self,
+        data_dir: str,
+        goal: str,
+        eval: str | None = None,
+        default_model: str | None = None,
+        code_model: str | None = None,
+        feedback_model: str | None = None,
+        report_model: str | None = None,
+    ):
         """Initialize a new experiment run.
 
         Args:
             data_dir (str): Path to the directory containing the data files.
             goal (str): Description of the goal of the task.
-            eval (str | None, optional): Optional description of the preferred way for the agent to evaluate its solutions.
+            eval (str | None, optional): Optional description of the preferred way for
+                the agent to evaluate its solutions.
+            default_model (str | None, optional): Default model to use for all LLM calls.
+                Overrides the config defaults.
+            code_model (str | None, optional): Specific model to use for code
+                generation. Overrides the default model.
+            feedback_model (str | None, optional): Specific model to use for feedback
+                and evaluation. Overrides the default model.
+            report_model (str | None, optional): Specific model to use for report
+                generation. Overrides the default model.
         """
 
         _cfg = _load_cfg(use_cli_args=False)
         _cfg.data_dir = data_dir
         _cfg.goal = goal
         _cfg.eval = eval
+
+        # Set default model if provided
+        if default_model:
+            _cfg.agent.code.model = default_model
+            _cfg.agent.feedback.model = default_model
+            _cfg.report.model = default_model
+
+        # Override specific models if provided
+        if code_model:
+            _cfg.agent.code.model = code_model
+        if feedback_model:
+            _cfg.agent.feedback.model = feedback_model
+        if report_model:
+            _cfg.report.model = report_model
+
         self.cfg = prep_cfg(_cfg)
 
         self.task_desc = load_task_desc(self.cfg)
 
-        with Status("Preparing agent workspace (copying and extracting files) ..."):
+        with Status("Preparing agent workspace..."):
             prep_agent_workspace(self.cfg)
 
         self.journal = Journal()
@@ -49,7 +82,8 @@ class Experiment:
             journal=self.journal,
         )
         self.interpreter = Interpreter(
-            self.cfg.workspace_dir, **OmegaConf.to_container(self.cfg.exec)  # type: ignore
+            self.cfg.workspace_dir,
+            **OmegaConf.to_container(self.cfg.exec)  # type: ignore
         )
 
     def run(self, steps: int) -> Solution:
