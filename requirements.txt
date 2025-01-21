@@ -22,10 +22,10 @@ igraph>=0.11.3
 genson>=1.2.0
 
 # agent requirements (packages that the agent might need)
-torch==2.2.0
-torchvision==0.17.0
-torchaudio==2.2.0
-torchtext==0.17.0
+torch==2.2.2
+torchvision==0.17.2
+torchaudio==2.2.2
+torchtext==0.17.2
 
 lightgbm
 matplotlib
