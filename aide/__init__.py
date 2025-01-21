@@ -31,24 +31,35 @@ class Experiment:
         code_model: str | None = None,
         feedback_model: str | None = None,
         report_model: str | None = None,
+        workspace_dir: str | None = None,
+        exp_name: str | None = None,
+        log_dir: str | None = None,
+        preprocess_data: bool | None = None,
+        copy_data: bool | None = None,
+        generate_report: bool | None = None,
     ):
         """Initialize a new experiment run.
 
         Args:
-            data_dir (str): Path to the directory containing the data files.
-            goal (str): Description of the goal of the task.
-            eval (str | None, optional): Optional description of the preferred way for
-                the agent to evaluate its solutions.
-            default_model (str | None, optional): Default model to use for all LLM calls.
-                Overrides the config defaults.
-            code_model (str | None, optional): Specific model to use for code
-                generation. Overrides the default model.
-            feedback_model (str | None, optional): Specific model to use for feedback
-                and evaluation. Overrides the default model.
-            report_model (str | None, optional): Specific model to use for report
-                generation. Overrides the default model.
+            data_dir: Path to the directory containing the data files.
+            goal: Description of the goal of the task.
+            eval: Optional description of the preferred way for the agent to
+                evaluate its solutions.
+            default_model: Default model to use for all LLM calls. Overrides
+                the config defaults.
+            code_model: Specific model to use for code generation. Overrides
+                the default model.
+            feedback_model: Specific model to use for feedback and evaluation.
+                Overrides the default model.
+            report_model: Specific model to use for report generation.
+                Overrides the default model.
+            workspace_dir: Directory for agent workspaces.
+            exp_name: Name of the experiment. Random if not provided.
+            log_dir: Directory for logs.
+            preprocess_data: Whether to unzip archives in data directory.
+            copy_data: Whether to copy data to workspace (vs symlink).
+            generate_report: Whether to generate a final report.
         """
-
         _cfg = _load_cfg(use_cli_args=False)
         _cfg.data_dir = data_dir
         _cfg.goal = goal
@@ -67,6 +78,20 @@ class Experiment:
             _cfg.agent.feedback.model = feedback_model
         if report_model:
             _cfg.report.model = report_model
+
+        # Set additional config parameters if provided
+        if workspace_dir:
+            _cfg.workspace_dir = workspace_dir
+        if exp_name:
+            _cfg.exp_name = exp_name
+        if log_dir:
+            _cfg.log_dir = log_dir
+        if preprocess_data is not None:
+            _cfg.preprocess_data = preprocess_data
+        if copy_data is not None:
+            _cfg.copy_data = copy_data
+        if generate_report is not None:
+            _cfg.generate_report = generate_report
 
         self.cfg = prep_cfg(_cfg)
 
